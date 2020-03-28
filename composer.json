@@ -1,0 +1,24 @@
+{
+    "name": "emetra/php-sapb1",
+    "type": "library",
+    "description": "SAP Business One Library for PHP, forked from syedhussim/php-sapb1",
+    "keywords": ["sap"],
+    "homepage": "https://github.com/emetra/php-sapb1",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Eliott Metra",
+            "email": "emetra@mc-media.com",
+            "homepage": "https://www.mc-media.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "\\SAPb1": "SAPb1"
+        }
+    }
+}
