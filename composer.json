@@ -1,7 +1,7 @@
 {
     "name": "blockshiftnetwork/php-sapb1",
     "type": "library",
-    "description": "SAP Business One Library for PHP, forked from emetra/php-sapb1",
+    "description": "SAP Business One Library for PHP, forked from blockshiftnetwork/php-sapb1",
     "keywords": ["sap"],
     "homepage": "https://github.com/blockshiftnetwork/php-sapb1",
     "license": "MIT",
