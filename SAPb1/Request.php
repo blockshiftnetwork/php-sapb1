@@ -6,13 +6,14 @@ namespace SAPb1;
  * Encapsulates an SAP B1 HTTP request.
  */
 class Request{
-    
+
     protected $url;
     protected $sslOptions = [];
     protected $method = 'GET';
     protected $postParams = null;
     protected $cookies = [];
-    
+    protected $headers = [];
+
     /**
      * Initializes a new instance of Request.
      */
@@ -20,7 +21,7 @@ class Request{
         $this->url = $url;
         $this->sslOptions = $sslOptions;
     }
-    
+
     /**
      * Sets the request method.
      */
@@ -28,7 +29,7 @@ class Request{
         $this->method = $method;
         return $this;
     }
-    
+
     /**
      * Sets the request post data.
      */
@@ -36,7 +37,7 @@ class Request{
         $this->postParams = $postParams;
         return $this;
     }
-    
+
     /**
      * Sets the request cookie data.
      */
@@ -46,29 +47,37 @@ class Request{
     }
 
     /**
+     * Add a header to request data.
+     */
+    public function addHeader(string $header) : Void{
+        $this->headers [] = $header;
+    }
+
+    /**
      * Executes the request and gets the response.
      */
     public function getResponse() : Response{
 
         $postdata = (null != $this->postParams) ? json_encode($this->postParams) : '';
 
-        $header = "Content-Type: application/json\r\n";
-        $header.= "Content-Length: " . strlen($postdata) . "\r\n";
-        
+        $this->addHeader('Content-Type: application/json');
+        $this->addHeader("Content-Length: " . strlen($postdata));
+
         if(count($this->cookies) > 0){
-            $header.= "Cookie: ";
+            $header = "Cookie: ";
             foreach($this->cookies as $name => $value){
                 $header.= $name .'='. $value . ';';
             }
-            $header.= "\r\n";
+
+            $this->addHeader($header);
         }
 
-        $options = array( 
+        $options = array(
             'http' => array(
                 'ignore_errors' => true,
                 'method'  => $this->method,
                 'content' => $postdata,
-                'header'  => $header,
+                'header'  => implode("\r\n", $this->headers),
             ),
             "ssl" => $this->sslOptions
         );
@@ -79,21 +88,21 @@ class Request{
                 throw new \ErrorException($message, $severity, $severity, $file, $line);
             }
         );
-        
+
         // Call the rest API.
         $body = file_get_contents($this->url, false, stream_context_create($options));
-        
+
         // Create the response object.
         $response = $this->createResponse($body, $http_response_header);
-        
+
         // Restore the error handler.
         restore_error_handler();
 
         return $response;
     }
-    
+
     private function createResponse($body, $responseHeaders) : Response{
-        
+
         $statusCode = 0;
         $headers = [];
         $cookies = [];
@@ -115,10 +124,10 @@ class Request{
 
                 // Collection of cookies.
                 $cookie = [];
-                
+
                 //Header key.
                 $key = $array[0];
-                
+
                 //Header value.
                 $value = $array[1];
 
@@ -134,16 +143,16 @@ class Request{
                     }
                     continue;
                 }
-                
-                if($key == 'Content-Type'){ 
+
+                if($key == 'Content-Type'){
                     // Extract the Content Type.
                     $contentParts = explode(';', $value);
                     $headers['Content-Type'] = trim($contentParts[0]);
                 }
                 elseif($key == 'Set-Cookie'){
-                    // Extract cookie data from the header 
+                    // Extract cookie data from the header
                     // and add it to a $cookies array.
-                    parse_str(strtr($value, array('&' => '%26', '+' => '%2B', ';' => '&')), $cookie); 
+                    parse_str(strtr($value, array('&' => '%26', '+' => '%2B', ';' => '&')), $cookie);
                     $cookies[key($cookie)] = reset($cookie);
                 }
                 else{
