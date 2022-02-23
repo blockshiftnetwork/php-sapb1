@@ -10,6 +10,8 @@ class Service{
     private $config;
     private $session;
     private $serviceName;
+    private $headers = [];
+    public  $serviceViewName;
     
     /**
      * Initializes a new instance of Service.
@@ -21,15 +23,19 @@ class Service{
     }
     
     /**
-     * Creates an entity. Returns the newly created entity on success.
+     * Creates an entity.
      * Throws SAPb1\SAPException if an error occurred.
      */
-    public function create(array $data) : object{
+    public function create(array $data){
         
         $response = $this->doRequest('POST', $data);
         
         if($response->getStatusCode() === 201){
             return $response->getJson();
+        }
+
+        if($response->getStatusCode() === 204){
+            return true;
         }
         
         throw new SAPException($response);
@@ -96,7 +102,15 @@ class Service{
      * Returns a new instance of SAPb1\Query.
      */
     public function queryBuilder() : Query{
-        return new Query($this->config, $this->session, $this->serviceName);
+        return new Query($this->config, $this->session, $this->serviceName, $this->headers);
+    }
+
+    /**
+     * Specifies request headers.
+     */
+    public function setHeaders($headers) : Service{
+        $this->headers = $headers;
+        return $this;
     }
     
     /**
@@ -157,6 +171,7 @@ class Service{
         $request = new Request($this->config->getServiceUrl($this->serviceName) . $action, $this->config->getSSLOptions());
         $request->setMethod($method);
         $request->setCookies($this->session);
+        $request->setHeaders($this->headers);
         $request->setPost($postData);
 
         return $request->getResponse();

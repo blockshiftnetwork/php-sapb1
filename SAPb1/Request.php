@@ -47,10 +47,11 @@ class Request{
     }
 
     /**
-     * Add a header to request data.
+     * Sets the request headers.
      */
-    public function addHeader(string $header) : Void{
-        $this->headers [] = $header;
+    public function setHeaders(array $headers) : Request{
+        $this->headers = array_merge($this->headers, $headers);
+        return $this;
     }
 
     /**
@@ -60,16 +61,21 @@ class Request{
 
         $postdata = (null != $this->postParams) ? json_encode($this->postParams) : '';
 
-        $this->addHeader('Content-Type: application/json');
-        $this->addHeader("Content-Length: " . strlen($postdata));
-
+        $header = "Content-Type: application/json\r\n";
+        $header.= "Content-Length: " . strlen($postdata) . "\r\n";
+        
         if(count($this->cookies) > 0){
-            $header = "Cookie: ";
+            $header.= "Cookie: ";
             foreach($this->cookies as $name => $value){
                 $header.= $name .'='. $value . ';';
             }
+            $header.= "\r\n";
+        }
 
-            $this->addHeader($header);
+        if(count($this->headers)){
+            foreach($this->headers as $name => $value){
+                $header.= $name .':'. $value . "\r\n";
+            }
         }
 
         $options = array(
@@ -77,7 +83,7 @@ class Request{
                 'ignore_errors' => true,
                 'method'  => $this->method,
                 'content' => $postdata,
-                'header'  => implode("\r\n", $this->headers),
+                'header'  => $header,
             ),
             "ssl" => $this->sslOptions
         );

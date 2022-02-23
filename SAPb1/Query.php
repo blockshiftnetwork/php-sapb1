@@ -10,14 +10,17 @@ class Query{
     private $query = [];
     private $filters = [];
     private $maxPageSize = 20;
+    private $headers = [];
+    private $apply = '';
 
     /**
      * Initializes a new instance of Query.
      */
-    public function __construct(Config $config, array $session, string $serviceName){
+    public function __construct(Config $config, array $session, string $serviceName, array $headers){
         $this->config = $config;
         $this->session = $session;
         $this->serviceName = $serviceName;
+        $this->headers = $headers;
     }
 
     /**
@@ -78,8 +81,16 @@ class Query{
     /**
      * Specifies the navigation properties to expand.
      */
-    public function expand($name){
+    public function expand($name) : Query{
         $this->query['expand'] = $name;
+        return $this;
+    }
+
+    /**
+     * Adds a apply string to the results.
+     */
+    public function apply(string $apply) : Query{
+        $this->apply = $apply;
         return $this;
     }
 
@@ -119,6 +130,11 @@ class Query{
             $requestQuery .= '$' . $name . '=' . rawurlencode($value) . '&';
         }
 
+        // Append the apply to the query string.
+        if($this->apply != ''){
+            $requestQuery .= '$apply='.rawurlencode($this->apply). '&';
+        }
+
         // Append the filters to the query string.
         if(count($this->filters) > 0){
             $requestQuery .= '$filter=';
@@ -137,9 +153,10 @@ class Query{
         // Execute the service API with the query string.
         $request = new Request($this->config->getServiceUrl($this->serviceName . $action) . $requestQuery, $this->config->getSSLOptions());
         $request->setMethod('GET');
+        $request->setHeaders($this->headers);
 
         // Set the maxpagesize odata parameter.
-        $request->addHeader("Prefer: odata.maxpagesize={$this->maxPageSize}");
+        $request->setHeaders(["Prefer" => "odata.maxpagesize={$this->maxPageSize}"]);
 
         // Set the SAP B1 session data.
         $request->setCookies($this->session);
@@ -157,6 +174,8 @@ class Query{
             elseif ($response->getHeaders('Content-Type') == 'application/json'){
 
                 $result = $response->getJson();
+
+                
 
                 // If a callback is specified, then call it for each result in
                 // the collection.
