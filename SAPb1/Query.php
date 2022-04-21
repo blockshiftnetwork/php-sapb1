@@ -124,7 +124,7 @@ class Query{
     private function doRequest(string $action = '', callable $callback = null){
 
         // Build the query string.
-        $requestQuery = '?';
+        $requestQuery = '';
 
         foreach($this->query as $name => $value){
             $requestQuery .= '$' . $name . '=' . rawurlencode($value) . '&';
@@ -149,9 +149,9 @@ class Query{
                 $requestQuery .= rawurlencode($op . $filter->execute());
             }
         }
-
+        
         // Execute the service API with the query string.
-        $request = new Request($this->config->getServiceUrl($this->serviceName . $action) . $requestQuery, $this->config->getSSLOptions());
+        $request = new Request($this->config->getServiceUrl($this->serviceName . $action) . ($requestQuery !== '' ? '?' : '') . $requestQuery, $this->config->getSSLOptions());
         $request->setMethod('GET');
         $request->setHeaders($this->headers);
 
