@@ -29,6 +29,10 @@ class Service{
     public function create(array $data){
         
         $response = $this->doRequest('POST', $data);
+
+        if($response->getStatusCode() === 200){
+            return $response->getJson();
+        }
         
         if($response->getStatusCode() === 201){
             return $response->getJson();
