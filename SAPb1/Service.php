@@ -52,10 +52,14 @@ class Service{
     public function update($id, array $data) : bool{
         
         if(is_string($id)){
-            $id = "'" . str_replace("'", "''", $id) . "'";
+            $value = "'" . str_replace("'", "''", $id) . "'";
         }
 
-        $response = $this->doRequest('PATCH', $data, '(' . $id . ')');
+        if(is_numeric($id)){
+            $value = str_replace("'", "''", $id);
+        }
+
+        $response = $this->doRequest('PATCH', $data, '(' . $value . ')');
 
         if($response->getStatusCode() === 204){
             return true;
@@ -71,10 +75,14 @@ class Service{
     public function delete($id) : bool{
         
         if(is_string($id)){
-            $id = "'" . str_replace("'", "''", $id) . "'";
+            $value = "'" . str_replace("'", "''", $id) . "'";
         }
 
-        $response = $this->doRequest('DELETE', '(' . $id . ')');
+        if(is_numeric($id)){
+            $value = str_replace("'", "''", $id);
+        }
+
+        $response = $this->doRequest('DELETE', '(' . $value . ')');
 
         if($response->getStatusCode() === 204){
             return true;
