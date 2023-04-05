@@ -42,7 +42,11 @@ class Service{
             return true;
         }
         
-        throw new SAPException($response);
+        throw new SAPException($response, [
+            'action' => 'create',
+            'data' => $data,
+            'status_code' => $response->getStatusCode(),
+        ]);
     }
     
     /**
@@ -61,7 +65,12 @@ class Service{
             return true;
         }
         
-        throw new SAPException($response);
+        throw new SAPException($response, [
+            'action' => 'update',
+            'id' => $id,
+            'data' => $data,
+            'status_code' => $response->getStatusCode(),
+        ]);
     }
     
     /**
@@ -80,7 +89,11 @@ class Service{
             return true;
         }
         
-        throw new SAPException($response);
+        throw new SAPException($response, [
+            'action' => 'delete',
+            'id' => $id,
+            'status_code' => $response->getStatusCode(),
+        ]);
     }
     
     /**
@@ -99,7 +112,11 @@ class Service{
             return true;
         }
         
-        throw new SAPException($response);
+        throw new SAPException($response, [
+            'action' => $action,
+            'id' => $id,
+            'status_code' => $response->getStatusCode(),
+        ]);
     }
     
     /**

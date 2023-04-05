@@ -57,6 +57,9 @@ class SAPClient{
             return new SAPClient($config->toArray(), $response->getCookies());
         }
         
-        throw new SAPException($response);
+        throw new SAPException($response, [
+            'action' => 'login',
+            'status_code' => $response->getStatusCode(),
+        ]);
     }
 }

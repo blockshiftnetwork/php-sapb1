@@ -193,6 +193,10 @@ class Query{
         }
 
         // Throw an exception when the response code is not 200.
-        throw new SAPException($response);
+        throw new SAPException($response, [
+            'action' => $action,
+            'request_query' => $requestQuery,
+            'status_code' => $response->getStatusCode(),
+        ]);
     }
 }
