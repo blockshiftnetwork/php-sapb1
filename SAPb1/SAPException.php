@@ -5,11 +5,11 @@ namespace SAPb1;
 class SAPException extends \Exception{
     
     protected $statusCode;
-    
+    protected $context;
     /**
      * Initializes a new instance of SAPException.
      */
-    public function __construct(Response $response){
+    public function __construct(Response $response, array $context = []){
         $this->statusCode = $response->getStatusCode();
         $message = '';
         $erroCode = $this->code;
@@ -22,6 +22,8 @@ class SAPException extends \Exception{
             $message = $response->getJson()->error->message->value ?? $response->getJson()->error->message;
             $erroCode = $response->getJson()->error->code;
         }
+
+        $this->context = $context;
         
         parent::__construct($message, $erroCode);
     }
@@ -29,4 +31,15 @@ class SAPException extends \Exception{
     public function getStatusCode() : int{
         return $this->statusCode;
     }
+
+    /**
+     * Get the exception's context information.
+     *
+     * @return array<string, mixed>
+     */
+    public function context(): array
+    {
+        return $this->context;
+    }
+    
 }
