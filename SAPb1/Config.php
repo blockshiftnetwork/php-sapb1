@@ -2,7 +2,7 @@
 
 namespace SAPb1;
 
-class Config{
+class Config {
     
     private $config = [];
     
@@ -40,5 +40,16 @@ class Config{
             return $this->config[$name];
         }
         return $default;
+    }
+
+
+    public function getAuthBasicString() : string{
+        $username = json_encode([
+            'UserName' => $this->get('username'),
+            'CompanyDB' => $this->get('company'),
+        ]);
+        $password = $this->get('password');        
+
+        return base64_encode($username . ':' . $password);
     }
 }

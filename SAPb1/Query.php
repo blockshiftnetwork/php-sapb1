@@ -5,7 +5,6 @@ namespace SAPb1;
 class Query{
 
     private $config;
-    private $session;
     private $serviceName;
     private $query = [];
     private $filters = [];
@@ -16,9 +15,8 @@ class Query{
     /**
      * Initializes a new instance of Query.
      */
-    public function __construct(Config $config, array $session, string $serviceName, array $headers){
+    public function __construct(Config $config, string $serviceName, array $headers){
         $this->config = $config;
-        $this->session = $session;
         $this->serviceName = $serviceName;
         $this->headers = $headers;
     }
@@ -153,13 +151,12 @@ class Query{
         // Execute the service API with the query string.
         $request = new Request($this->config->getServiceUrl($this->serviceName . $action) . ($requestQuery !== '' ? '?' : '') . $requestQuery, $this->config->getSSLOptions());
         $request->setMethod('GET');
+        $request->setHeaders(['Authorization' => 'Basic ' . $this->config->getAuthBasicString()]);
         $request->setHeaders($this->headers);
 
         // Set the maxpagesize odata parameter.
         $request->setHeaders(["Prefer" => "odata.maxpagesize={$this->maxPageSize}"]);
 
-        // Set the SAP B1 session data.
-        $request->setCookies($this->session);
         $response = $request->getResponse();
 
         // Check if the response code is successful.

@@ -7,8 +7,7 @@ namespace SAPb1;
  */
 class Service{
     
-    private $config;
-    private $session;
+    private Config $config;
     private $serviceName;
     private $headers = [];
     public  $serviceViewName;
@@ -16,9 +15,8 @@ class Service{
     /**
      * Initializes a new instance of Service.
      */
-    public function __construct(Config $configOptions, array $session, string $serviceName){
+    public function __construct(Config $configOptions, string $serviceName){
         $this->config = $configOptions;
-        $this->session = $session;
         $this->serviceName = $serviceName;
     }
     
@@ -123,7 +121,7 @@ class Service{
      * Returns a new instance of SAPb1\Query.
      */
     public function queryBuilder() : Query{
-        return new Query($this->config, $this->session, $this->serviceName, $this->headers);
+        return new Query($this->config, $this->serviceName, $this->headers);
     }
 
     /**
@@ -140,7 +138,10 @@ class Service{
     public function getMetaData() : array{
         $request = new Request($this->config->getServiceUrl('$metadata'), $this->config->getSSLOptions());
         $request->setMethod('GET');
-        $request->setCookies($this->session);
+        $authHeader = ['Authorization' => 'Basic ' . $this->config->getAuthBasicString()];
+        $this->headers = array_merge($this->headers, $authHeader);
+        $request->setHeaders($this->headers);
+        
         $response = $request->getResponse(); 
 
         $dom = new \DOMDocument();
@@ -191,7 +192,10 @@ class Service{
     private function doRequest($method, $postData, $action = '') : Response{
         $request = new Request($this->config->getServiceUrl($this->serviceName) . $action, $this->config->getSSLOptions());
         $request->setMethod($method);
-        $request->setCookies($this->session);
+        
+        $authHeader = ['Authorization' => 'Basic ' . $this->config->getAuthBasicString()];
+        $this->headers = array_merge($this->headers, $authHeader);
+        
         $request->setHeaders($this->headers);
         $request->setPost($postData);
 
